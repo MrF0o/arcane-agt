@@ -6,5 +6,6 @@
 
 namespace arcane {
     namespace scanner {
+
     } // scanner
 } // arcane

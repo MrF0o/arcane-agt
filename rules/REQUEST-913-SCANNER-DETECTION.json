@@ -1,0 +1,797 @@
+[
+    {
+        "argument": "# ------------------------------------------------------------------------",
+        "lineno": 1,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# OWASP CRS ver.4.2.0-dev",
+        "lineno": 2,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.",
+        "lineno": 3,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# Copyright (c) 2021-2024 CRS project. All rights reserved.",
+        "lineno": 4,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 5,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# The OWASP CRS is distributed under",
+        "lineno": 6,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# Apache Software License (ASL) version 2",
+        "lineno": 7,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# Please see the enclosed LICENSE file for full details.",
+        "lineno": 8,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# ------------------------------------------------------------------------",
+        "lineno": 9,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 11,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -= Paranoia Level 0 (empty) =- (apply unconditionally)",
+        "lineno": 12,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 13,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913011",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 17
+            },
+            {
+                "act_arg": "1",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 17
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 17
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 17
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 17
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 17
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 17
+            }
+        ],
+        "chained": false,
+        "lineno": 17,
+        "operator": "@lt",
+        "operator_argument": "1",
+        "oplineno": 17,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913012",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 18
+            },
+            {
+                "act_arg": "2",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 18
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 18
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 18
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 18
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 18
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 18
+            }
+        ],
+        "chained": false,
+        "lineno": 18,
+        "operator": "@lt",
+        "operator_argument": "1",
+        "oplineno": 18,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "argument": "#",
+        "lineno": 19,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -= Paranoia Level 1 (default) =- (apply only when tx.detection_paranoia_level is sufficiently high: 1 or higher)",
+        "lineno": 20,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 21,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 23,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -=[ Security Scanner Checks ]=-",
+        "lineno": 24,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 25,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# This rule inspects the default User-Agent and Header values sent by",
+        "lineno": 26,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# various commercial and open source scanners, mostly",
+        "lineno": 27,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# security / vulnerability scanners.",
+        "lineno": 28,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 29,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# It is based on a curated list of known malicious scanners in widespread use.",
+        "lineno": 30,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# This list is maintained in scanners-user-agents.data.",
+        "lineno": 31,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 32,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# With CRSv4, the project has given up on keeping track of different categories",
+        "lineno": 33,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# of scanners and scripting agents, mostly because it's very hard to draw",
+        "lineno": 34,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# a line between benign, mostly benign and malicious. And because dedicated",
+        "lineno": 35,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# attackers will change the user agent anyways.",
+        "lineno": 36,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913100",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 39
+            },
+            {
+                "act_arg": "1",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 40
+            },
+            {
+                "act_name": "block",
+                "act_quote": "no_quote",
+                "lineno": 41
+            },
+            {
+                "act_name": "capture",
+                "act_quote": "no_quote",
+                "lineno": 42
+            },
+            {
+                "act_arg": "none",
+                "act_name": "t",
+                "act_quote": "no_quote",
+                "lineno": 43
+            },
+            {
+                "act_arg": "Found User-Agent associated with security scanner",
+                "act_name": "msg",
+                "act_quote": "quotes",
+                "lineno": 44
+            },
+            {
+                "act_arg": "Matched Data: %{TX.0} found within %{MATCHED_VAR_NAME}: %{MATCHED_VAR}",
+                "act_name": "logdata",
+                "act_quote": "quotes",
+                "lineno": 45
+            },
+            {
+                "act_arg": "application-multi",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 46
+            },
+            {
+                "act_arg": "language-multi",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 47
+            },
+            {
+                "act_arg": "platform-multi",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 48
+            },
+            {
+                "act_arg": "attack-reputation-scanner",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 49
+            },
+            {
+                "act_arg": "paranoia-level/1",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 50
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 51
+            },
+            {
+                "act_arg": "capec/1000/118/224/541/310",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 52
+            },
+            {
+                "act_arg": "PCI/6.5.10",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 53
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 54
+            },
+            {
+                "act_arg": "CRITICAL",
+                "act_name": "severity",
+                "act_quote": "quotes",
+                "lineno": 55
+            },
+            {
+                "act_arg": "tx.inbound_anomaly_score_pl1=+%{tx.critical_anomaly_score}",
+                "act_name": "setvar",
+                "act_quote": "quotes",
+                "lineno": 56
+            }
+        ],
+        "chained": false,
+        "lineno": 38,
+        "operator": "@pmFromFile",
+        "operator_argument": "scanners-user-agents.data",
+        "oplineno": 38,
+        "type": "SecRule",
+        "variables": [
+            "REQUEST_HEADERS:User-Agent"
+        ]
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913013",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 59
+            },
+            {
+                "act_arg": "1",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 59
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 59
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 59
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 59
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 59
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 59
+            }
+        ],
+        "chained": false,
+        "lineno": 59,
+        "operator": "@lt",
+        "operator_argument": "2",
+        "oplineno": 59,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913014",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 60
+            },
+            {
+                "act_arg": "2",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 60
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 60
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 60
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 60
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 60
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 60
+            }
+        ],
+        "chained": false,
+        "lineno": 60,
+        "operator": "@lt",
+        "operator_argument": "2",
+        "oplineno": 60,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "argument": "#",
+        "lineno": 61,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -= Paranoia Level 2 =- (apply only when tx.detection_paranoia_level is sufficiently high: 2 or higher)",
+        "lineno": 62,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 63,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913015",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 67
+            },
+            {
+                "act_arg": "1",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 67
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 67
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 67
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 67
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 67
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 67
+            }
+        ],
+        "chained": false,
+        "lineno": 67,
+        "operator": "@lt",
+        "operator_argument": "3",
+        "oplineno": 67,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913016",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 68
+            },
+            {
+                "act_arg": "2",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 68
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 68
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 68
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 68
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 68
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 68
+            }
+        ],
+        "chained": false,
+        "lineno": 68,
+        "operator": "@lt",
+        "operator_argument": "3",
+        "oplineno": 68,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "argument": "#",
+        "lineno": 69,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -= Paranoia Level 3 =- (apply only when tx.detection_paranoia_level is sufficiently high: 3 or higher)",
+        "lineno": 70,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 71,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913017",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 75
+            },
+            {
+                "act_arg": "1",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 75
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 75
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 75
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 75
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 75
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 75
+            }
+        ],
+        "chained": false,
+        "lineno": 75,
+        "operator": "@lt",
+        "operator_argument": "4",
+        "oplineno": 75,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "actions": [
+            {
+                "act_arg": "913018",
+                "act_name": "id",
+                "act_quote": "no_quote",
+                "lineno": 76
+            },
+            {
+                "act_arg": "2",
+                "act_name": "phase",
+                "act_quote": "no_quote",
+                "lineno": 76
+            },
+            {
+                "act_name": "pass",
+                "act_quote": "no_quote",
+                "lineno": 76
+            },
+            {
+                "act_name": "nolog",
+                "act_quote": "no_quote",
+                "lineno": 76
+            },
+            {
+                "act_arg": "OWASP_CRS",
+                "act_name": "tag",
+                "act_quote": "quotes",
+                "lineno": 76
+            },
+            {
+                "act_arg": "OWASP_CRS/4.2.0-dev",
+                "act_name": "ver",
+                "act_quote": "quotes",
+                "lineno": 76
+            },
+            {
+                "act_arg": "END-REQUEST-913-SCANNER-DETECTION",
+                "act_name": "skipAfter",
+                "act_quote": "no_quote",
+                "lineno": 76
+            }
+        ],
+        "chained": false,
+        "lineno": 76,
+        "operator": "@lt",
+        "operator_argument": "4",
+        "oplineno": 76,
+        "type": "SecRule",
+        "variables": [
+            "TX:DETECTION_PARANOIA_LEVEL"
+        ]
+    },
+    {
+        "argument": "#",
+        "lineno": 77,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -= Paranoia Level 4 =- (apply only when tx.detection_paranoia_level is sufficiently high: 4 or higher)",
+        "lineno": 78,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 79,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 83,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "# -= Paranoia Levels Finished =-",
+        "lineno": 84,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "#",
+        "lineno": 85,
+        "quoted": "no_quote",
+        "type": "Comment"
+    },
+    {
+        "argument": "END-REQUEST-913-SCANNER-DETECTION",
+        "lineno": 86,
+        "quoted": "quoted",
+        "type": "SecMarker"
+    }
+]

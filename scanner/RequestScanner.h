@@ -10,7 +10,8 @@
 namespace arcane {
     namespace scanner {
 
-        class RequestScanner: public Scanner {
+        class RequestScanner {
+        private:
 
         };
 

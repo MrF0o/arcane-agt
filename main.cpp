@@ -1,17 +1,32 @@
-#include <boost/beast.hpp>
-#include <boost/asio.hpp>
-#include <iostream>
-#include <string>
+#include "net/HttpProxy.h"
+#include "scanner/Scanner.h"
+#include <thread>
+
+using namespace arcane;
 
 int main() {
-    HttpClient client;
-    HttpServer server;
-    HttpProxy proxy(client, server);
+    scanner::Scanner sc;
+    io_context context;
+    arcane::net::HttpProxy proxy(context);
 
-    proxy.addRequestScanner(std::make_unique<RequestScanner>());
-    proxy.addResponseScanner(std::make_unique<ResponseScanner>());
+    proxy.setBeforeForwardingToBackend([&](arcane::net::HttpProxy* ctx, http::request<http::string_body>& req) {
+        std::cout << "[HOOK] (setBeforeForwardingToBackend)" << std::endl;
+        sc.scan_inbound(req);
+    });
 
-    proxy.forward();
+
+    proxy.setBeforeSendingToClient([&](arcane::net::HttpProxy* ctx) {
+        auto res = http::response<http::string_body>();
+        sc.scan_outbound(res);
+    });
+
+    std::thread thread([&]() {
+        while (true) {
+            proxy.forward();
+        }
+    });
+
+    thread.join();
 
     return 0;
 }
