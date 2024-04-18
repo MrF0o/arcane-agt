@@ -8,9 +8,10 @@
 #endif //ARCANEAGT_RULES_H
 
 #include "scanner/rules/SecRule.h"
-#include "scanner/rules/request/ExSSLPinger.h"
-#include "scanner/rules/request/ExApacheInterConn.h"
+#include "scanner/rules/request/CommonExceptions.h"
+#include "scanner/rules/request/MethodEnforcement.h"
+#include "scanner/rules/request/ScannerDetection.h"
 
-using namespace arcane::scanner::rules;
+using namespace arcane::scanner;
 
-extern std::vector<SecRule*> rs;
+extern std::vector<rules::SecRule*> rs(Scanner* ctx);

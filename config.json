@@ -1,0 +1,9 @@
+{
+  "license_key": "dev_key",
+  "app": {
+    "endpoint": "192.168.1.3",
+    "port": 8000,
+    "should_resolve": false,
+    "force_ssl": false
+  }
+}

@@ -18,14 +18,16 @@ using namespace boost::asio;
 namespace arcane {
     namespace net {
         class HttpProxy {
-            public:
-                HttpProxy(io_context& ctx);
+        public:
+            HttpProxy(io_context &ctx);
 
-                // forward the request back and forth
-                void forward();
+            // forward the request back and forth
+            void forward();
 
-            void setBeforeForwardingToBackend(std::function<void(HttpProxy*, http::request<http::string_body>&)> pFunc);
-            void setBeforeSendingToClient(std::function<void(HttpProxy*)> pFunc);
+            void
+            setBeforeForwardingToBackend(std::function<void(HttpProxy *, http::request<http::string_body> &)> pFunc);
+
+            void setBeforeSendingToClient(std::function<void(HttpProxy *)> pFunc);
 
         private:
             // used to connect to the protected webserver
@@ -33,15 +35,15 @@ namespace arcane {
             // used to listen for the proxied request
             HttpServer server;
             // shared between the client and the server
-            io_context& io_ctx;
+            io_context &io_ctx;
 
             // backend server info
             std::string backendHost = "127.0.0.1";
             std::string backendPort = "8000";
 
             // Hooks
-            std::function<void(HttpProxy*, http::request<http::string_body>&)> beforeForwardingToBackend;
-            std::function<void(HttpProxy*)> beforeSendingToClient;
+            std::function<void(HttpProxy *, http::request<http::string_body> &)> beforeForwardingToBackend;
+            std::function<void(HttpProxy *)> beforeSendingToClient;
         };
     }
 }

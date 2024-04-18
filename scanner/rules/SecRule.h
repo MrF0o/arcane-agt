@@ -9,42 +9,34 @@
 #include <vector>
 #include <sstream>
 #include <boost/beast.hpp>
+#include <boost/regex.hpp>
+
+#include "scanner/Scanner.h"
 using namespace boost::beast;
+
+
+
+#define CRIT_VALUE  5
 
 using request = http::request<http::string_body>;
 
-namespace arcane {
 
-    namespace scanner {
 
-        class Scanner;
+    namespace arcane::scanner {
+
 
         namespace rules {
 
-            enum severity {
-                SV_UNSPEC,
-                SV_NOTICE = 2,
-                SV_WARNING,
-                SV_ERROR,
-                SV_CRITICAL,
-            };
-
-            enum Scans {
-                SCAN_NOSCAN,
-                SCAN_INBOUND,
-                SCAN_OUTBOUND
-            };
-
             class SecRule {
             public:
+                SecRule(Scanner* ctx) : ctx(ctx) {}
 
                 virtual void exec(request& req) = 0;
-            private:
+
+            protected:
                 // rules are managed by this
                 // we need this to set the vars
-                Scanner* ctx;
-                int severity_level  = SV_UNSPEC;
-                int scans = SCAN_NOSCAN;
+                arcane::scanner::Scanner* ctx;
                 std::string msg;
                 int phase;
                 bool block;
@@ -65,14 +57,10 @@ namespace arcane {
 
                     return "";
                 }
-
-                bool ip_match(std::string, ...) {
-                    return false;
-                }
             };
         }
     }
 
-} // arcane
+// arcane
 
 #endif //ARCANEAGT_SECRULE_H

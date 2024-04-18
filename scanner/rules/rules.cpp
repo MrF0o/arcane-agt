@@ -5,7 +5,13 @@
 
 #include "scanner/rules/rules.h"
 
-std::vector<SecRule*> rs = {
-        // REQUEST-COMMON-EXCEPTIONS
-        new request::ExSSLPinger()
+std::vector<rules::SecRule*> rs(Scanner* ctx) {
+        return {
+                // REQUEST-COMMON-EXCEPTIONS
+                new rules::request::CommonExceptions(ctx),
+                // REQUEST-METHOD-ENFORCEMENT
+                new rules::request::MethodEnforcement(ctx),
+                // REQUEST-SCANNER-DETECTION
+                new rules::request::ScannerDetection(ctx),
+        };
 };

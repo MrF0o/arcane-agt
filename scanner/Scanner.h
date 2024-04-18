@@ -8,28 +8,39 @@
 #include <memory>
 #include <boost/beast.hpp>
 #include "ScanResult.h"
-#include "scanner/rules/SecRule.h"
-#include "rules/rules.h"
+#include "api/ApiWrapper.h"
 
 using namespace boost::beast;
 
-namespace arcane {
-    namespace scanner {
 
+    namespace arcane::scanner {
+        class SecRule;
         class Scanner {
         public:
-            std::unique_ptr<ScanResult> scanTextAsHttpContent();
-            std::unique_ptr<ScanResult> validateRequestHeaders();
-            std::unique_ptr<ScanResult> validateResponseHeaders();
+
+            Scanner() {
+                Scanner::api.connect();
+                Scanner::api.sendTest();
+            }
 
             std::unique_ptr<ScanResult> scan_inbound(http::request<http::string_body>& request);
             std::unique_ptr<ScanResult> scan_outbound(http::response<http::string_body>& response);
 
+            inline int get_detection_paranoia_level() const {return detection_paranoia_level;}
+
+            bool passRequest();
+
+            void add_inbound_anomaly_score(int i);
+
         private:
-            unsigned int inbound_threshold;
-            unsigned int outbound_threshold;
+            unsigned int inbound_threshold = 5;
+            unsigned int outbound_threshold = 5;
+            unsigned int inbound_anomaly = 0;
+            unsigned int detection_paranoia_level = 2;
+            bool shouldPassRequest = false;
+            static api::ApiWrapper api;
         };
     } // scanner
-} // arcane
+// arcane
 
 #endif //ARCANEAGT_SCANNER_H
