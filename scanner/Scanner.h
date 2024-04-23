@@ -20,7 +20,6 @@ using namespace boost::beast;
 
             Scanner() {
                 Scanner::api.connect();
-                Scanner::api.sendTest();
             }
 
             std::unique_ptr<ScanResult> scan_inbound(http::request<http::string_body>& request);
