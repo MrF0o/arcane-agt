@@ -30,7 +30,7 @@ void arcane::net::HttpProxy::forward() {
         // TODO: check if request is blocked and send a blocked page
         client.send(req);
         auto res = client.receive();
-        beforeSendingToClient(this);
+        beforeSendingToClient(this, res);
 
         // TODO: check if response is blocked and send a blocked page
         server.send(res);
@@ -89,6 +89,29 @@ std::string catfs(std::string pathFromRoot) {
     return "";
 }
 
+std::string readSnippets(const std::string& path, std::streamoff start, std::streamoff end) {
+    std::ifstream fin(path);
+
+    if (!fin.is_open()) {
+        std::cout << "Error reading file for portion\n";
+        return "";
+    }
+
+    std::string portion;
+    std::string line;
+    fin.seekg(start, std::ios::beg);
+    for (int i = 0; i <= end; i++) {
+        if (i < start) {
+            std::getline(fin, line);
+        } else {
+            std::getline(fin, line);
+            portion += line;
+        }
+    }
+
+    return portion;
+}
+
 arcane::net::HttpProxy::HttpProxy(io_context &ctx)
         : io_ctx(ctx), client(ctx), server(ctx) {
 
@@ -102,9 +125,9 @@ arcane::net::HttpProxy::HttpProxy(io_context &ctx)
 
             http::response<http::string_body> res_;
             res_.set("User-Agent", "Arcane Agent");
-            res_.set("Content-Type", "application/json");
+            // res_.set("Content-Type", "application/json");
             std::string file_content = catfs("C:/xampp/htdocs/test/" + root.get<std::string>("file_path"));
-            res_.body() = std::string(R"({"content": "{)") + file_content + R"(}"})";
+            res_.body() = file_content;
             std::cout << res_.body() << std::endl;
             res.send(res_);
             std::cout << "Webhook handled" << std::endl;
@@ -127,6 +150,30 @@ arcane::net::HttpProxy::HttpProxy(io_context &ctx)
         }
     });
 
+    server.addWebhook("/_fileSnippets", [&](http::request<http::string_body> &req, net::HttpServer &res) {
+        if (req.base().at("Content-Type") == "application/json") {
+            // our server needs json
+            pt::ptree root;
+            std::stringstream ss;
+            ss << req.body();
+            pt::read_json(ss, root);
+
+
+            http::response<http::string_body> res_;
+            res_.set("User-Agent", "Arcane Agent");
+            // res_.set("Content-Type", "application/json");
+            int start = root.get<int>("start_offset");
+            int end = root.get<int>("start_offset");
+            auto path = "C:/xampp/htdocs/test/" + root.get<std::string>("file_path");
+            std::string snippets = readSnippets(path, start, end);
+            std::cout << "_________________________________" <<std::endl;
+            std::cout << snippets << std::endl;
+            std::cout << "\n";
+            res_.body() = snippets;
+            res.send(res_);
+        }
+    });
+
     std::cout << "[HttpProxy] Server and client started" << std::endl;
     std::cout << "[HttpProxy] The proxy is running" << std::endl;
 }
@@ -136,6 +183,6 @@ void arcane::net::HttpProxy::setBeforeForwardingToBackend(
     beforeForwardingToBackend = std::move(pFunc);
 }
 
-void arcane::net::HttpProxy::setBeforeSendingToClient(std::function<void(HttpProxy * )> pFunc) {
+void arcane::net::HttpProxy::setBeforeSendingToClient(std::function<void(HttpProxy *, http::response<http::string_body> &res)> pFunc) {
     beforeSendingToClient = std::move(pFunc);
 }

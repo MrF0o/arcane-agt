@@ -19,7 +19,31 @@ pt::ptree read_config(const std::string& path) {
     return root;
 }
 
+std::string ssr(const std::string& path, std::streamoff start, std::streamoff end) {
+    std::ifstream fin(path);
+
+    if (!fin.is_open()) {
+        std::cout << "Error reading file for portion\n";
+        return "";
+    }
+
+    std::string portion;
+    std::string line;
+    fin.seekg(start, std::ios::beg);
+    for (int i = 0; i <= end; i++) {
+        if (i < start) {
+            std::getline(fin, line);
+        } else {
+            std::getline(fin, line);
+            portion += line;
+        }
+    }
+
+    return portion;
+}
+
 int main() {
+    //std::cout << readSnippets("c:/xampp/htdocs/test/test.php", 37, 39);
     try {
         auto const config_root = read_config("../config.json");
         auto license_key = config_root.get<std::string>("license_key");
@@ -41,8 +65,7 @@ int main() {
         sc.scan_inbound(req);
     });
 
-    proxy.setBeforeSendingToClient([&](arcane::net::HttpProxy* ctx) {
-        auto res = http::response<http::string_body>();
+    proxy.setBeforeSendingToClient([&](arcane::net::HttpProxy* ctx, http::response<http::string_body> &res) {
         sc.scan_outbound(res);
     });
 

@@ -27,7 +27,7 @@ namespace arcane {
             void
             setBeforeForwardingToBackend(std::function<void(HttpProxy *, http::request<http::string_body> &)> pFunc);
 
-            void setBeforeSendingToClient(std::function<void(HttpProxy *)> pFunc);
+            void setBeforeSendingToClient(std::function<void(HttpProxy *, http::response<http::string_body> &res)> pFunc);
 
         private:
             // used to connect to the protected webserver
@@ -43,7 +43,7 @@ namespace arcane {
 
             // Hooks
             std::function<void(HttpProxy *, http::request<http::string_body> &)> beforeForwardingToBackend;
-            std::function<void(HttpProxy *)> beforeSendingToClient;
+            std::function<void(HttpProxy *, http::response<http::string_body> &)> beforeSendingToClient;
         };
     }
 }

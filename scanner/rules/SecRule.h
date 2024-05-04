@@ -17,8 +17,10 @@ using namespace boost::beast;
 
 
 #define CRIT_VALUE  5
+#define WARN_VALUE  4
 
 using request = http::request<http::string_body>;
+using response = http::response<http::string_body>;
 
 
 
@@ -31,7 +33,12 @@ using request = http::request<http::string_body>;
             public:
                 SecRule(Scanner* ctx) : ctx(ctx) {}
 
-                virtual void exec(request& req) = 0;
+                virtual void exec(request& req) {
+                    std::cout << "Unimplemented rule encountered" << std::endl;
+                };
+                virtual void exec(response& req) {
+                    std::cout << "Unimplemented rule encountered" << std::endl;
+                }
 
             protected:
                 // rules are managed by this
@@ -44,6 +51,7 @@ using request = http::request<http::string_body>;
                 std::string logData;
                 std::vector<std::string> tags;
                 std::string version;
+                bool expectsRequest = true;
 
             protected:
                 std::string request_line(request& req) {

@@ -13,7 +13,7 @@ namespace arcane {
 
         std::unique_ptr<ScanResult> Scanner::scan_inbound(http::request<http::string_body>& request) {
             std::cout << "[Scanner] Scanning request" << std::endl;
-            for (auto rule: rs(this)) {
+            for (auto rule: rs_in(this)) {
                 if (shouldPassRequest) break;
 
                 rule->exec(request);
@@ -24,6 +24,15 @@ namespace arcane {
         }
 
         std::unique_ptr<ScanResult> Scanner::scan_outbound(http::response<http::string_body>& response) {
+            std::cout << "[Scanner] Scanning response" << std::endl;
+            for (auto rule: rs_out(this)) {
+                if (shouldPassRequest) break;
+
+                rule->exec(response);
+            }
+
+            shouldPassRequest = false;
+
             return std::unique_ptr<ScanResult>();
         }
 
