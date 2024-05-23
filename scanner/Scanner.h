@@ -19,7 +19,7 @@ using namespace boost::beast;
         public:
 
             Scanner() {
-                Scanner::api.connect();
+                // Scanner::api.connect();
             }
 
             std::unique_ptr<ScanResult> scan_inbound(http::request<http::string_body>& request);

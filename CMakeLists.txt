@@ -15,6 +15,9 @@ add_executable(arcaneagt main.cpp
         scanner/ScannerConfig.cpp
         scanner/rules/rules.cpp
         scanner/rules/request/ProtocolEnforcement.h
-        scanner/rules/response/WebShells.h)
-target_include_directories(arcaneagt PRIVATE ${PROJECT_SOURCE_DIR})
+        scanner/rules/response/WebShells.h
+        libinjection/src/libinjection_sqli.c
+        libinjection/src/libinjection_xss.c
+        libinjection/src/libinjection_html5.c)
+target_include_directories(arcaneagt PRIVATE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/libinjection/src ${PROJECT_SOURCE_DIR}/spdlog/include)
 target_link_libraries(arcaneagt ws2_32 wsock32 pthread)

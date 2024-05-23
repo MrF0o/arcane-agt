@@ -23,12 +23,9 @@ namespace arcane::scanner::rules::response {
         // this rule is intended for php webshells
         void exec(::response& res) {
             if (ctx->get_detection_paranoia_level() >= 1) {
-                std::cout << res.base();
                 if (res.find("Content-Type")->value().contains("text/html")) {
-                    std::cout << "yess";
                     std::ifstream shells("../coreruleset/rules/web-shells-php.data");
                     if  (shells.is_open()) {
-                        std::cout << "opened shells" << std::endl;
                         std::string line = "";
 
                         while (std::getline(shells, line)) {

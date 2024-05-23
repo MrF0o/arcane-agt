@@ -8,6 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 
@@ -21,6 +22,7 @@ void arcane::net::HttpProxy::forward() {
         // check if it's a webhook request
 
         if (server.handleWebhook(req)) {
+            std::cout << "Webhook handled" << std::endl;
             return;
         }
 
@@ -174,8 +176,11 @@ arcane::net::HttpProxy::HttpProxy(io_context &ctx)
         }
     });
 
-    std::cout << "[HttpProxy] Server and client started" << std::endl;
-    std::cout << "[HttpProxy] The proxy is running" << std::endl;
+    spdlog::info("[HttpProxy] Server and client started");
+    spdlog::info("[HttpProxy] The proxy is running");
+
+    spdlog::warn("SQL Injection detected; user ip: 192.168.10.5");
+    spdlog::warn("XSS detected; user ip: 192.168.10.5");
 }
 
 void arcane::net::HttpProxy::setBeforeForwardingToBackend(

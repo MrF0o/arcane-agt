@@ -17,9 +17,9 @@ namespace arcane::scanner::rules::request {
     class CommonExceptions : public SecRule {
 
     public:
-        CommonExceptions(Scanner* ctx) : SecRule(ctx) {}
+        CommonExceptions(Scanner *ctx) : SecRule(ctx) {}
 
-        void exec(::request& req) override {
+        void exec(::request &req) override {
             auto ip = req.base().at("X-Forwarded-For");
             auto user_agent = req.base().at("User-Agent");
             if (request_line(req) == "GET /") {

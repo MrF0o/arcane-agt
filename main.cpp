@@ -1,25 +1,34 @@
+#define LIBINJECTION_VERSION 0
+
 #include "net/HttpProxy.h"
 #include "scanner/Scanner.h"
 #include <thread>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/json.hpp>
-
 #include <iostream>
-#include <filesystem>
+#include <spdlog/spdlog.h>
+
 namespace fs = std::filesystem;
 
 using namespace arcane;
 namespace pt = boost::property_tree;
 
-pt::ptree read_config(const std::string& path) {
+pt::ptree read_config(const std::string &path) {
     pt::ptree root;
     pt::read_json(path, root);
 
     return root;
 }
 
-std::string ssr(const std::string& path, std::streamoff start, std::streamoff end) {
+void print_banner() {
+    spdlog::info("***************************************************");
+    spdlog::info("| Arcane WAF Agent (SECURAS + ISGGB)              |");
+    spdlog::info("| Started                                         |");
+    spdlog::info("***************************************************");
+    std::cout << std::endl;
+}
+
+std::string ssr(const std::string &path, std::streamoff start, std::streamoff end) {
     std::ifstream fin(path);
 
     if (!fin.is_open()) {
@@ -43,7 +52,8 @@ std::string ssr(const std::string& path, std::streamoff start, std::streamoff en
 }
 
 int main() {
-    //std::cout << readSnippets("c:/xampp/htdocs/test/test.php", 37, 39);
+    print_banner();
+
     try {
         auto const config_root = read_config("../config.json");
         auto license_key = config_root.get<std::string>("license_key");
@@ -52,7 +62,7 @@ int main() {
             std::cout << "Invalid license key provided!" << std::endl;
             return -1;
         }
-    } catch (std::exception& ex) {
+    } catch (std::exception &ex) {
         std::cout << "Invalid config file. please reinstall the agent or run the troubleshooter" << std::endl;
         return -1;
     }
@@ -61,11 +71,11 @@ int main() {
     io_context context;
     arcane::net::HttpProxy proxy(context);
 
-    proxy.setBeforeForwardingToBackend([&](arcane::net::HttpProxy* ctx, http::request<http::string_body>& req) {
+    proxy.setBeforeForwardingToBackend([&](arcane::net::HttpProxy *ctx, http::request<http::string_body> &req) {
         sc.scan_inbound(req);
     });
 
-    proxy.setBeforeSendingToClient([&](arcane::net::HttpProxy* ctx, http::response<http::string_body> &res) {
+    proxy.setBeforeSendingToClient([&](arcane::net::HttpProxy *ctx, http::response<http::string_body> &res) {
         sc.scan_outbound(res);
     });
 
