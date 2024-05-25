@@ -10,8 +10,10 @@
 #include <sstream>
 #include <boost/beast.hpp>
 #include <boost/regex.hpp>
+#include <spdlog/spdlog.h>
 
 #include "scanner/Scanner.h"
+#include "api/ApiWrapper.h"
 
 using namespace boost::beast;
 
@@ -56,6 +58,7 @@ namespace arcane::scanner::rules {
         bool expectsRequest = true;
 
     protected:
+        ::request* current_req = nullptr;
         std::string request_line(request &req) {
             std::stringstream s;
             s << req;

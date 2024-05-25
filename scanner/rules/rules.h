@@ -13,6 +13,7 @@
 #include "scanner/rules/request/ScannerDetection.h"
 #include "scanner/rules/request/ProtocolEnforcement.h"
 #include "scanner/rules/request/SQLInjection.h"
+#include "scanner/rules/request/XSSInjection.h"
 
 #include "scanner/rules/response/WebShells.h"
 

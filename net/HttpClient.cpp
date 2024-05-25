@@ -18,7 +18,6 @@ http::response<http::string_body> arcane::net::HttpClient::receive() {
 }
 
 void arcane::net::HttpClient::send(http::request<http::string_body> &request) {
-    std::cout << "sending " << std::endl;
     auto v = http::write(socket, request);
 }
 

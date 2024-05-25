@@ -8,6 +8,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <filesystem>
+#include <boost/regex.hpp>
+#include "api/ApiWrapper.h"
+#include "scanner/Scanner.h"
 #include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
@@ -20,16 +23,17 @@ void arcane::net::HttpProxy::forward() {
         auto req = server.receive();
 
         // check if it's a webhook request
-
         if (server.handleWebhook(req)) {
-            std::cout << "Webhook handled" << std::endl;
             return;
         }
 
         client.connect(backendHost, backendPort);
         beforeForwardingToBackend(this, req);
 
-        // TODO: check if request is blocked and send a blocked page
+        if (scanner::Scanner::isBlocked) {
+            this->sendBlockedPage();
+        }
+
         client.send(req);
         auto res = client.receive();
         beforeSendingToClient(this, res);
@@ -47,10 +51,10 @@ void arcane::net::HttpProxy::forward() {
     }
 }
 
-std::vector<std::string> ls(const fs::path& path = "c:/xampp/htdocs/test", std::string parent = "") {
+std::vector<std::string> ls(const fs::path &path = "c:/xampp/htdocs/test", std::string parent = "") {
     std::vector<std::string> entries;
 
-    for (const auto& entry : fs::directory_iterator(path)) {
+    for (const auto &entry: fs::directory_iterator(path)) {
         if (fs::is_directory(entry.path())) {
             auto subdir_entries = ls(entry.path(), parent + entry.path().filename().string() + "/");
             entries.insert(entries.end(), subdir_entries.begin(), subdir_entries.end());
@@ -62,12 +66,12 @@ std::vector<std::string> ls(const fs::path& path = "c:/xampp/htdocs/test", std::
     return entries;
 }
 
-std::string listdir(const fs::path& path = "c:/xampp/htdocs/test") {
+std::string listdir(const fs::path &path = "c:/xampp/htdocs/test") {
     std::vector<std::string> entries = ls(path);
 
     std::string jsonArray = "[";
     bool isFirstEntry = true;
-    for (const auto& entry : entries) {
+    for (const auto &entry: entries) {
         if (!isFirstEntry) {
             jsonArray += ",";
         } else {
@@ -91,7 +95,7 @@ std::string catfs(std::string pathFromRoot) {
     return "";
 }
 
-std::string readSnippets(const std::string& path, std::streamoff start, std::streamoff end) {
+std::string readSnippets(const std::string &path, std::streamoff start, std::streamoff end) {
     std::ifstream fin(path);
 
     if (!fin.is_open()) {
@@ -115,7 +119,7 @@ std::string readSnippets(const std::string& path, std::streamoff start, std::str
 }
 
 arcane::net::HttpProxy::HttpProxy(io_context &ctx)
-        : io_ctx(ctx), client(ctx), server(ctx) {
+        : io_ctx(ctx), client(ctx), server(ctx, this->serverPort) {
 
     server.addWebhook("/_getFileContent", [&](http::request<http::string_body> &req, net::HttpServer &res) {
         if (req.base().at("Content-Type") == "application/json") {
@@ -132,7 +136,6 @@ arcane::net::HttpProxy::HttpProxy(io_context &ctx)
             res_.body() = file_content;
             std::cout << res_.body() << std::endl;
             res.send(res_);
-            std::cout << "Webhook handled" << std::endl;
         }
     });
 
@@ -168,19 +171,19 @@ arcane::net::HttpProxy::HttpProxy(io_context &ctx)
             int end = root.get<int>("start_offset");
             auto path = "C:/xampp/htdocs/test/" + root.get<std::string>("file_path");
             std::string snippets = readSnippets(path, start, end);
-            std::cout << "_________________________________" <<std::endl;
-            std::cout << snippets << std::endl;
-            std::cout << "\n";
             res_.body() = snippets;
             res.send(res_);
         }
     });
 
-    spdlog::info("[HttpProxy] Server and client started");
-    spdlog::info("[HttpProxy] The proxy is running");
+    server.addWebhook("/_updateWebConfig", [&](http::request<http::string_body> &req, net::HttpServer &res) {
+        if (req.base().at("Content-Type") == "application/json") {
+            arcane::api::ApiWrapper::getWebConfig();
+        }
+    });
 
-    spdlog::warn("SQL Injection detected; user ip: 192.168.10.5");
-    spdlog::warn("XSS detected; user ip: 192.168.10.5");
+    spdlog::info("[HttpProxy] Server and client started");
+    spdlog::info("[HttpProxy] The proxy is listening on port " + std::to_string(this->serverPort));
 }
 
 void arcane::net::HttpProxy::setBeforeForwardingToBackend(
@@ -188,6 +191,18 @@ void arcane::net::HttpProxy::setBeforeForwardingToBackend(
     beforeForwardingToBackend = std::move(pFunc);
 }
 
-void arcane::net::HttpProxy::setBeforeSendingToClient(std::function<void(HttpProxy *, http::response<http::string_body> &res)> pFunc) {
+void arcane::net::HttpProxy::setBeforeSendingToClient(
+        std::function<void(HttpProxy * , http::response<http::string_body> & res)> pFunc) {
     beforeSendingToClient = std::move(pFunc);
+}
+
+void arcane::net::HttpProxy::sendBlockedPage() {
+    std::ifstream file("../static/blocked.html");
+    std::stringstream ss;
+    ss << file.rdbuf();
+    std::string content = ss.str();
+    boost::regex_replace(content, boost::regex("{ip}"), this->currentReq.at("X-Forwarded-For"));
+
+    this->currentRes.body() = content;
+    this->currentRes.set(http::field::content_type, "text/html");
 }

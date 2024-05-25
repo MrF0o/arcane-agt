@@ -17,6 +17,8 @@ std::vector<rules::SecRule *> rs_in(Scanner *ctx) {
             new rules::request::ProtocolEnforcement(ctx),
             // REQUEST-ATTACK-SQLI
             new rules::request::SQLInjection(ctx),
+            // REQUEST-ATTACK-XSS
+            new rules::request::XSSInjection(ctx)
     };
 };
 

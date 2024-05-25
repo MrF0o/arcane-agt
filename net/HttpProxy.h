@@ -27,19 +27,26 @@ namespace arcane {
             void
             setBeforeForwardingToBackend(std::function<void(HttpProxy *, http::request<http::string_body> &)> pFunc);
 
-            void setBeforeSendingToClient(std::function<void(HttpProxy *, http::response<http::string_body> &res)> pFunc);
+            void
+            setBeforeSendingToClient(std::function<void(HttpProxy *, http::response<http::string_body> &res)> pFunc);
+
+            void sendBlockedPage();
 
         private:
             // used to connect to the protected webserver
             HttpClient client;
             // used to listen for the proxied request
+            short serverPort = 4350;
             HttpServer server;
             // shared between the client and the server
             io_context &io_ctx;
 
             // backend server info
-            std::string backendHost = "127.0.0.1";
-            std::string backendPort = "8000";
+            std::string backendHost = "127.0.1.1";
+            std::string backendPort = "3333";
+
+            http::request<http::string_body> currentReq;
+            http::response<http::string_body> currentRes;
 
             // Hooks
             std::function<void(HttpProxy *, http::request<http::string_body> &)> beforeForwardingToBackend;

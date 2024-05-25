@@ -2,6 +2,7 @@
 
 #include "net/HttpProxy.h"
 #include "scanner/Scanner.h"
+#include "api/ApiWrapper.h"
 #include <thread>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -11,6 +12,8 @@
 namespace fs = std::filesystem;
 
 using namespace arcane;
+
+using web = arcane::api::ApiWrapper;
 namespace pt = boost::property_tree;
 
 pt::ptree read_config(const std::string &path) {
@@ -56,14 +59,31 @@ int main() {
 
     try {
         auto const config_root = read_config("../config.json");
+        arcane::scanner::Scanner::config = config_root;
         auto license_key = config_root.get<std::string>("license_key");
 
         if (license_key.empty()) {
-            std::cout << "Invalid license key provided!" << std::endl;
+            spdlog::warn("Missing license key!");
             return -1;
         }
+
+        web::auth = license_key;
+        web::isSSL = config_root.get<bool>("app.use_ssl");
+        web::api_endpoint = config_root.get<std::string>("app.endpoint");
+        web::api_port = config_root.get<int>("app.port");
+        if (web::isSSL) {
+            web::connectSSL();
+        } else {
+            web::connect();
+        }
+        if (!web::isTokenValid(license_key)) {
+            spdlog::warn("Invalid license key, please renew your subscription at https://arcane.wip/app/login");
+            return -1;
+        }
+        web::getWebConfig();
     } catch (std::exception &ex) {
-        std::cout << "Invalid config file. please reinstall the agent or run the troubleshooter" << std::endl;
+        spdlog::error("Invalid installation. please run the installation helper again");
+        spdlog::error(ex.what());
         return -1;
     }
 

@@ -32,15 +32,17 @@ namespace arcane::scanner::rules::request {
                         boost::trim(userAgent);
                         if (line[0] != '#') {
                             if (line == userAgent) {
-                                std::cout << "Found User-Agent associated with security scanner" << std::endl;
-                                ctx->add_inbound_anomaly_score(CRIT_VALUE);
-                                // block the bot by calling ctx
+                                spdlog::warn("Found User-Agent associated with security scanner");
+                                ApiWrapper::log("WARNING", "Found User-Agent associated with security scanner", "User-Agent", "header", userAgent, req.base().at("X-Forwarded-For"));
+                                scanner::Scanner::isBlocked = true;
                             }
                         }
                     }
 
                 } catch (std::out_of_range &exc) {
-                    std::cout << "Get a request without a user-agent string" << std::endl;
+                    spdlog::warn("Got a request without a User-Agent string");
+                    ApiWrapper::log("WARNING", "Got a request without a User-Agent string", "User-Agent", "header", "", req.base().at("X-Forwarded-For"));
+                    scanner::Scanner::isBlocked = true;
                 }
 
             }

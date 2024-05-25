@@ -7,14 +7,19 @@
 
 #include <string>
 #include <boost/beast.hpp>
-#include <boost/json.hpp>
+#include <map>
 #include <boost/asio.hpp>
 #include <boost/beast/http/message.hpp>
+#include <boost/beast/ssl.hpp>
+#include <boost/asio/ssl.hpp>
 #include <iostream>
 
 using namespace boost::beast;
+using namespace boost;
 using namespace boost::asio;
+using namespace boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
+
 namespace arcane {
     namespace api {
 
@@ -22,41 +27,34 @@ namespace arcane {
         public:
             static std::string api_endpoint;
             static int api_port;
-            static tcp::socket socket;
-            static tcp::resolver resolver;
+            static bool isSSL;
             static io_context io_context;
+            static ssl::context ssl_context;
+            static std::string auth;
+            static tcp::resolver resolver;
+            static std::unique_ptr<tcp::socket> socket;
+            static std::unique_ptr<ssl::stream<tcp::socket>> ssl_stream;
 
             static void
-            log(std::string level, std::string message, http::request<http::string_body> &msg);
+            log(std::string level, std::string message, std::string var_name, std::string var_kind, std::string value,
+                std::string ip);
 
-            static void
-            log(std::string level, std::string message, http::response<http::string_body> &msg);
+            static bool isTokenValid(std::string token);
 
+            static std::map<std::string, std::string> getWebConfig();
 
-            inline bool connect() {
-                auto const endpoint = tcp::endpoint(ip::address::from_string(ApiWrapper::api_endpoint), ApiWrapper::api_port);
+            static bool connect();
 
-               ApiWrapper::socket.connect(endpoint);
+            static bool connectSSL();
 
-                return true;
-            }
+            int sendTest();
 
-            inline bool connectSSL();
+            static http::response<http::string_body> post(std::string path, http::request<http::string_body> req);
 
-            int sendTest() {
-                http::request<http::string_body> req(http::verb::get, "/api/test", 11);
-                req.set(http::field::host, "protectedsite.com");
-                req.set(http::field::accept, "application/json");
-                req.set(http::field::user_agent, "Agent/1.0 " + std::string(BOOST_BEAST_VERSION_STRING));
-                http::write(ApiWrapper::socket, req);
+            static http::response<http::string_body> get(std::string path);
 
-                // read
-                flat_buffer buf;
-                http::response<http::string_body> res;
-                http::read(ApiWrapper::socket, buf, res);
-                std::cout << res.body();
-                return 0; // returns bytes sent
-            }
+        private:
+            bool verify_certificate(bool preverified, ssl::verify_context &ctx);
         };
 
     } // api

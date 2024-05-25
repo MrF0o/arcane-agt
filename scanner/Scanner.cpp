@@ -9,35 +9,45 @@
 
 namespace arcane {
     namespace scanner {
-        api::ApiWrapper Scanner::api;
+        pt::ptree Scanner::config;
+        pt::ptree Scanner::webConfig;
+        bool Scanner::isBlocked = false;
 
-        std::unique_ptr<ScanResult> Scanner::scan_inbound(http::request<http::string_body>& request) {
-            std::cout << "[Scanner] Scanning request" << std::endl;
+        bool Scanner::scan_inbound(http::request<http::string_body>& request) {
             for (auto rule: rs_in(this)) {
                 if (shouldPassRequest) break;
 
                 rule->exec(request);
+
+                if (isBlocked) {
+                    return true;
+                }
             }
 
             shouldPassRequest = false;
-            return std::unique_ptr<ScanResult>();
+            return false;
         }
 
-        std::unique_ptr<ScanResult> Scanner::scan_outbound(http::response<http::string_body>& response) {
-            std::cout << "[Scanner] Scanning response" << std::endl;
+        bool Scanner::scan_outbound(http::response<http::string_body>& response) {
             for (auto rule: rs_out(this)) {
                 if (shouldPassRequest) break;
 
                 rule->exec(response);
+
+                if (isBlocked) {
+                    return true;
+                }
             }
 
             shouldPassRequest = false;
 
-            return std::unique_ptr<ScanResult>();
+            return false;
         }
 
         bool Scanner::passRequest() {
             shouldPassRequest = true;
+
+            return shouldPassRequest;
         }
 
         void Scanner::add_inbound_anomaly_score(int i) {

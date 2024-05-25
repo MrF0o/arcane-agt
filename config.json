@@ -1,10 +1,13 @@
 {
-  "license_key": "dev_key",
+  "license_key": "69|0k2z0nRynMvQA1WUhOG4GDMcBxcErWRIZ4cf96dR",
   "app": {
-    "endpoint": "192.168.1.3",
+    "endpoint": "127.0.0.1",
     "port": 8000,
-    "doc_root": "C:/xampp/htdocs/test",
+    "domain": "127.0.1.1",
+    "docroot": "C:/xampp/htdocs/test",
     "should_resolve": false,
-    "force_ssl": false
+    "use_ssl": false,
+    "backend_endpoint": "127.0.1.1",
+    "backend_port": 3333
   }
 }

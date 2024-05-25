@@ -10,9 +10,13 @@
 #include "api/ApiWrapper.h"
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include <boost/url.hpp>
+#include "libinjection.h"
+#include "libinjection_sqli.h"
 
 using namespace arcane::scanner;
 using namespace arcane::api;
+using namespace boost;
 
 namespace arcane::scanner::rules::request {
     class SQLInjection : public SecRule {
@@ -20,24 +24,79 @@ namespace arcane::scanner::rules::request {
         SQLInjection(Scanner *ctx) : SecRule(ctx) {}
 
         void exec(::request &req) {
+            this->current_req = &req;
+            std::stringstream ss;
+            ss << req;
+
             auto cookies = request_cookies(req);
             auto cookie_names = request_cookies_names(req);
-            auto args = request_args(req);
-            auto args_names = request_args_names(req);
+            // auto args = request_args(req);
+            // auto args_names = request_args_names(req);
+            urls::url_view u(req.target());
 
-            runOnString("test", "test", "information_schema");
+            for (auto &cookie: cookies) {
+                libinjection_sqli_state state;
+                libinjection_sqli_init(&state, cookie.c_str(), cookie.size(), FLAG_NONE);
+
+                if (runOnString("cookie", cookie, cookie)) {
+                    spdlog::warn("SQL Injection detected; user ip: " + std::string(req.base().at("X-Forwarded-For")));
+                }
+
+                if (libinjection_is_sqli(&state)) {
+                    spdlog::warn("[LibInjection] {} {}", "SQL Injection detected; user ip: ",
+                                 std::string(req.base().at("X-Forwarded-For")));
+                }
+            }
+
+            for (auto &cname: cookie_names) {
+                libinjection_sqli_state state;
+                libinjection_sqli_init(&state, cname.c_str(), cname.size(), FLAG_NONE);
+
+                if (runOnString("cookie_name", cname, cname)) {
+                    spdlog::warn("SQL Injection detected; user ip: " + std::string(req.base().at("X-Forwarded-For")));
+                }
+
+                if (libinjection_is_sqli(&state)) {
+                    spdlog::warn("[LibInjection] {} {}", "SQL Injection detected; user ip: ",
+                                 std::string(req.base().at("X-Forwarded-For")));
+                }
+            }
+
+            for (auto arg: u.params()) {
+                auto a = arg.key + "=" + arg.value;
+                if (runOnString("arg", arg.key, arg.key) || runOnString("arg_name", arg.key, arg.value)) {
+                    spdlog::warn("SQL Injection detected; user ip: " + std::string(req.base().at("X-Forwarded-For")));
+                }
+
+                libinjection_sqli_state state;
+                libinjection_sqli_init(&state, a.c_str(), a.size(), FLAG_NONE);
+
+                if (libinjection_is_sqli(&state)) {
+                    spdlog::warn("[LibInjection] {} {}", "SQL Injection detected; user ip: ",
+                                 std::string(req.base().at("X-Forwarded-For")));
+                }
+            }
+
+            auto body = req.body();
+            libinjection_sqli_state state;
+            libinjection_sqli_init(&state, body.c_str(), body.size(), FLAG_NONE);
+
+            // request body
+            if (runOnString("body", body, body)) {
+                spdlog::warn("SQL Injection detected; user ip: " + std::string(req.base().at("X-Forwarded-For")));
+            }
+
+            if (libinjection_is_sqli(&state)) {
+                spdlog::warn("[LibInjection] {} {}", "SQL Injection detected; user ip: ",
+                             std::string(req.base().at("X-Forwarded-For")));
+            }
+
 
         }
 
-        std::vector<RegRun> runOnCookie() {}
-
-        std::vector<RegRun> runOnArgs() {
-
-        }
-
-        RegRun runOnString(std::string varkind, std::string var_name, std::string var_value) {
+        bool runOnString(std::string varkind, const std::string &var_name, const std::string &var_value) {
             std::vector<std::string> patterns = {
-                    R"((?i)(?!(?:database|db_name)\W*\(|information_schema|master\.\.sysdatabases|msdb|sys\.database_name|sysaux|northwind|pg_(?:catalog|toast)|tempdb)\b(?!schema(?:_name\b|\W*\()|sqlite_(?:temp_)?master))",
+                    R"((?i)\b(?:database\W*\(|db_name\W*\(|information_schema|master\.\.sysdatabases|msdb|sys\.database_name|sysaux|northwind|pg_(?:catalog|toast)|tempdb|schema(?:_name\b|\W*\()|sqlite_(?:temp_)?master)\b)",
                     R"((?i)\b(?:a(?:dd(?:dat|tim)e|es_(?:de|en)crypt|s(?:cii(?:str)?|in)|tan2?)|b(?:enchmark|i(?:n_to_num|t_(?:and|count|length|x?or)))|c(?:har(?:acter)?_length|iel(?:ing)?|o(?:alesce|ercibility|llation|(?:mpres)?s|n(?:cat(?:_ws)?|nection_id|v(?:ert(?:_tz)?)?)|t)|r32|ur(?:(?:dat|tim)e|rent_(?:date|setting|time(?:stamp)?|user)))|d(?:a(?:t(?:abase(?:_to_xml)?|e(?:_(?:add|format|sub)|diff))|y(?:name|of(?:month|week|year)))|count|e(?:code|grees|s_(?:de|en)crypt)|ump)|e(?:lt|n(?:c(?:ode|rypt)|ds_?with)|x(?:p(?:ort_set)?|tract(?:value)?))|f(?:i(?:el|n)d_in_set|ound_rows|rom_(?:base64|days|unixtime))|g(?:e(?:ometrycollection|t(?:_(?:format|lock)|pgusername))|(?:r(?:eates|oup_conca)|tid_subse)t)|hex(?:toraw)?|i(?:fnull|n(?:et6?_(?:aton|ntoa)|s(?:ert|tr)|terval)|s(?:_(?:(?:free|used)_lock|ipv(?:4(?:_(?:compat|mapped))?|6)|n(?:ot(?:_null)?|ull)|superuser)|null))|json(?:_(?:a(?:gg|rray(?:_(?:elements(?:_text)?|length))?)|build_(?:array|object)|e(?:ac|xtract_pat)h(?:_text)?|object(?:_(?:agg|keys))?|populate_record(?:set)?|strip_nulls|t(?:o_record(?:set)?|ypeof))|b(?:_(?:array(?:_(?:elements(?:_text)?|length))?|build_(?:array|object)|object(?:_(?:agg|keys))?|e(?:ac|xtract_pat)h(?:_text)?|insert|p(?:ath_(?:(?:exists|match)(?:_tz)?|query(?:_(?:(?:array|first)(?:_tz)?|tz))?)|opulate_record(?:set)?|retty)|s(?:et(?:_lax)?|trip_nulls)|t(?:o_record(?:set)?|ypeof)))?|path)?|l(?:ast_(?:day|inser_id)|case|e(?:as|f)t|i(?:kel(?:ihood|y)|nestring)|o(?:_(?:from_bytea|put)|ad_file|ca(?:ltimestamp|te)|g(?:10|2)|wer)|pad|trim)|m(?:a(?:ke(?:_set|date)|ster_pos_wait)|d5|i(?:crosecon)?d|onthname|ulti(?:linestring|po(?:int|lygon)))|n(?:ame_const|ot_in|ullif)|o(?:ct(?:et_length)?|(?:ld_passwo)?rd)|p(?:eriod_(?:add|diff)|g_(?:client_encoding|(?:databas|read_fil)e|l(?:argeobject|s_dir)|sleep|user)|o(?:(?:lyg|siti)on|w)|rocedure_analyse)|qu(?:arter|ery_to_xml|ote)|r(?:a(?:dians|nd|wtohex)|elease_lock|ow_(?:count|to_json)|pad|trim)|s(?:chema|e(?:c_to_time|ssion_user)|ha[12]?|in|oundex|pace|q(?:lite_(?:compileoption_(?:get|used)|source_id)|rt)|t(?:arts_?with|d(?:dev_(?:po|sam)p)?|r(?:_to_date|cmp))|ub(?:(?:dat|tim)e|str(?:ing(?:_index)?)?)|ys(?:date|tem_user))|t(?:ime(?:_(?:format|to_sec)|diff|stamp(?:add|diff)?)|o(?:_(?:base64|jsonb?)|n?char|(?:day|second)s)|r(?:im|uncate))|u(?:case|n(?:compress(?:ed_length)?|hex|i(?:str|x_timestamp)|likely)|(?:pdatexm|se_json_nul)l|tc_(?:date|time(?:stamp)?)|uid(?:_short)?)|var(?:_(?:po|sam)p|iance)|we(?:ek(?:day|ofyear)|ight_string)|xmltype|yearweek)[^0-9A-Z_a-z]*\()",
                     R"((?i:sleep\(\s*?\d*?\s*?\)|benchmark\(.*?\,.*?\)))",
                     R"((?i)(?:select|;)[\s\x0b]+(?:benchmark|if|sleep)[\s\x0b]*?\([\s\x0b]*?\(?[\s\x0b]*?[0-9A-Z_a-z]+)",
@@ -87,16 +146,32 @@ namespace arcane::scanner::rules::request {
                     R"((?i)\W+\d*?\s*?\bhaving\b\s*?[^\s\-])",
             };
 
-            for(int i = 0; i < patterns.size(); i++) {
-                std::cout << "pattern (" << i << ")" << std::endl;
-                boost::regex regex(patterns[i]);
-                if (boost::regex_search(var_value, regex)) {
-                    std::cout << "Pattern matched: " << patterns[i] << std::endl;
+            for (const auto &pattern: patterns) {
+                boost::regex regex(pattern);
+                boost::smatch match;
+                if (boost::regex_search(var_value, match, regex)) {
+                    scanner::Scanner::isBlocked = true;
+                    if (pattern ==
+                        R"((?i)^(?:[^']*?(?:'[^']*?'[^']*?)*?'|[^\"]*?(?:\"[^\"]*?\"[^\"]*?)*?\"|[^`]*?(?:`[^`]*?`[^`]*?)*?`)[\s\x0b]*([0-9A-Z_a-z]+)\b)") {
+                        if (boost::regex_search(var_value, match, boost::regex("^(?:and|or)$"))) {
+                            log(var_name, varkind, match);
+                            return true;
+                        } else {
+                            continue;
+                        }
+                    }
+                    log(var_name, varkind, match);
+                    return true;
                 }
             }
 
-            return {"", "", ""};
+            return false;
+        }
 
+        void log(std::string var_name, std::string var_kind, boost::smatch match) {
+            ApiWrapper::log("CRITICAL", "SQL Injection Attempt Blocked", var_name, var_kind,
+                            std::string(match[0].first, match[0].second),
+                            this->current_req->at("X-Forwarded-For"));
         }
     };
 }
