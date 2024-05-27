@@ -150,16 +150,17 @@ namespace arcane::scanner::rules::request {
                 boost::regex regex(pattern);
                 boost::smatch match;
                 if (boost::regex_search(var_value, match, regex)) {
-                    scanner::Scanner::isBlocked = true;
                     if (pattern ==
                         R"((?i)^(?:[^']*?(?:'[^']*?'[^']*?)*?'|[^\"]*?(?:\"[^\"]*?\"[^\"]*?)*?\"|[^`]*?(?:`[^`]*?`[^`]*?)*?`)[\s\x0b]*([0-9A-Z_a-z]+)\b)") {
                         if (boost::regex_search(var_value, match, boost::regex("^(?:and|or)$"))) {
                             log(var_name, varkind, match);
+                            scanner::Scanner::isBlocked = true;
                             return true;
                         } else {
                             continue;
                         }
                     }
+                    scanner::Scanner::isBlocked = true;
                     log(var_name, varkind, match);
                     return true;
                 }

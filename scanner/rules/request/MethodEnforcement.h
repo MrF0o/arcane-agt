@@ -21,6 +21,8 @@ namespace arcane::scanner::rules::request {
             // check paranoia
             if (ctx->get_detection_paranoia_level() >= 1) {
                 if (ScannerConfig::allowed_methods.find(req.method_string()) == std::string::npos) {
+                    scanner::Scanner::isBlocked = true;
+                    spdlog::warn("A request method is not allowed by policy");
                     ApiWrapper::log("CRITICAL", "Method is not allowed by policy", "request_method", "base",
                                     req.method_string(),
                                     req.at("X-Forwarded-For"));

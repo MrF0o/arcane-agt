@@ -63,7 +63,7 @@ namespace arcane::scanner::rules {
             std::stringstream s;
             s << req;
             std::string line;
-
+            std::cout << s.str() << std::endl;
             if (std::getline(s, line)) {
                 return line;
             }

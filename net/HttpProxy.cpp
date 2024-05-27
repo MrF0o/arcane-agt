@@ -21,7 +21,7 @@ void arcane::net::HttpProxy::forward() {
     try {
         server.listen(8080);
         auto req = server.receive();
-
+        this->currentReq = req;
         // check if it's a webhook request
         if (server.handleWebhook(req)) {
             return;
@@ -30,15 +30,28 @@ void arcane::net::HttpProxy::forward() {
         client.connect(backendHost, backendPort);
         beforeForwardingToBackend(this, req);
 
+        // for the request
         if (scanner::Scanner::isBlocked) {
+            scanner::Scanner::isBlocked = false;
             this->sendBlockedPage();
+            client.close();
+            server.close();
+            return;
         }
 
         client.send(req);
         auto res = client.receive();
         beforeSendingToClient(this, res);
 
-        // TODO: check if response is blocked and send a blocked page
+        // for the response
+        if (scanner::Scanner::isBlocked) {
+            scanner::Scanner::isBlocked = false;
+            this->sendBlockedPage();
+            client.close();
+            server.close();
+            return;
+        }
+
         server.send(res);
 
         client.close();
@@ -201,8 +214,9 @@ void arcane::net::HttpProxy::sendBlockedPage() {
     std::stringstream ss;
     ss << file.rdbuf();
     std::string content = ss.str();
-    boost::regex_replace(content, boost::regex("{ip}"), this->currentReq.at("X-Forwarded-For"));
+    boost::regex_replace(content, boost::regex("\\{ip\\}"), this->currentReq.at("X-Forwarded-For"));
 
     this->currentRes.body() = content;
     this->currentRes.set(http::field::content_type, "text/html");
+    server.send(this->currentRes);
 }

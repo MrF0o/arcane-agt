@@ -20,15 +20,15 @@ namespace arcane::scanner::rules::request {
         ProtocolEnforcement(Scanner *ctx) : SecRule(ctx) {}
 
         void exec(::request &req) override {
-
+            validateRequestLine(req);
         }
 
-        bool validateRequestLine(const std::string& requestLine) {
+        bool validateRequestLine(::request &req) {
             boost::regex rx(
                     R"((?i)^(?:get /[^#\?]*(?:\?[^\s\x0b#]*)?(?:#[^\s\x0b]*)?|(?:connect (?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}\.?(?::[0-9]+)?|[\--9A-Z_a-z]+:[0-9]+)|options \*|[a-z]{3,10}[\s\x0b]+(?:[0-9A-Z_a-z]{3,7}?://[\--9A-Z_a-z]*(?::[0-9]+)?)?/[^#\?]*(?:\?[^\s\x0b#]*)?(?:#[^\s\x0b]*)?)[\s\x0b]+[\.-9A-Z_a-z]+))");
 
-            if (boost::regex_match(requestLine, rx)) {
-                ApiWrapper::log("CRITICAL", "Got a request with an invalid HTTP Request Line", "Request-Line", "base", requestLine);
+            if (!boost::regex_match(request_line(req), rx)) {
+                ApiWrapper::log("CRITICAL", "Got a request with an invalid HTTP Request Line", "Request-Line", "base", request_line(req), req.base().at("X-Forwarded-For"));
                 spdlog::warn("Got a request with an invalid HTTP Request Line");
                 scanner::Scanner::isBlocked = true;
                 // ctx->add_inbound_anomaly_score(WARN_VALUE);
